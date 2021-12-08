@@ -37,8 +37,15 @@ class FishPopulation{
 
 let fish = new FishPopulation(input)
 console.log(fish)
-for(let i = 0; i < 9000; i++) {
+console.time('4 million generations')
+for(let i = 0; i < 4000000; i++) {
+  if (i % 100000 === 0) {
+    console.timeEnd('100,000 generations')
+    console.log(i)
+    console.time('100,000 generations')
+  }
   fish.generateNewDay()
 }
-console.log(fish)
+// console.log(fish)
+console.timeEnd('4 million generations')
 console.log(fish.population)
