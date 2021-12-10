@@ -48,7 +48,7 @@ function point(x, y) {
 }
 
 function crawl(x, y, basin) {
-  if (input[y] === undefined || input[y][x] === undefined || input[y][x] === 9 || basin.has(point(x, y))) {
+  if (input?.[y] === undefined || input?.[y]?.[x] === undefined || input?.[y]?.[x] === 9 || basin.has(point(x, y))) {
     // console.log(input?.[y] === undefined,  input?.[y]?.[x] === undefined, input?.[y]?.[x] === 9, basin.has(point(x, y)))
     return
   }
@@ -59,15 +59,29 @@ function crawl(x, y, basin) {
   crawl(x, y - 1, basin)
 }
 
+function nonRecursiveCrawl(x0, y0, basin) {
+  const queue = []
+  queue.push({x: x0, y: y0, basin})
+  while (queue.length > 0) {
+    const {x, y} = queue.pop()
+    if (input[y] === undefined || input[y]?.[x] === undefined || input[y][x] === 9 || basin.has(point(x, y))) continue
+    basin.add(point(x, y))
+    queue.push({x: x + 1, y, basin})
+    queue.push({x: x - 1, y, basin})
+    queue.push({x, y: y + 1, basin})
+    queue.push({x, y: y - 1, basin})
+  }
+}
+
 console.log(part1)
 
 function solvePart2() {
-  lowPoints.forEach(({x, y, basin}) => crawl(x, y, basin))
+  lowPoints.forEach(({x, y, basin}) => nonRecursiveCrawl(x, y, basin))
   const basinSizes = lowPoints
     .map(({basin}) => {
       return basin.size
     })
-  basinSizes.sort((a, b) => b - a)
+  console.log(basinSizes.sort((a, b) => b - a))
   const top3 = basinSizes.slice(0, 3)
   console.log(top3, top3.reduce((a, b) => a * b, 1))
 }
