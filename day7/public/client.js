@@ -17,17 +17,16 @@ const totalDistance = (target, values) => {
   }, 0)
 }
 
+const data = rawData
+.split(',')
+.map(x => parseInt(x))
 
-fetch('/data')
-  .then(response => response.json())
-  .then(data => {
-    targetInput.oninput = e => {
-      target = parseInt(e.target.value)
-      targetDisplay.innerText = e.target.value
-      const value = totalDistance(target, data)
-      const right = totalDistance(target + 1, data) < value
-      const left = totalDistance(target - 1, data) < value
+targetInput.oninput = e => {
+  target = parseInt(e.target.value)
+  targetDisplay.innerText = e.target.value
+  const value = totalDistance(target, data)
+  const right = totalDistance(target + 1, data) < value
+  const left = totalDistance(target - 1, data) < value
 
-      output.innerText = `${value} ${right ? '->' : ''}${left ? '<-' : ''}${!right && !left ? 'X' : ''}`
-    }
-  })
+  output.innerText = `${value} ${right ? '->' : ''}${left ? '<-' : ''}${!right && !left ? 'X' : ''}`
+}
