@@ -1,0 +1,18 @@
+.point-input {
+  border: 2px solid #333;
+  padding: 25px;
+  max-width: 250px;
+}
+
+.point-input > div {
+  max-width: 250px;
+}
+
+#go {
+  width: 200px;
+  height: 100px;
+}
+
+.hidden {
+  display: hidden;
+}

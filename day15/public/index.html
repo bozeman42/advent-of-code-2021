@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div>
+    <div class="point-input">
+      <div >
+        <input type="range" step="1" min="0" max="499" id="x" /> x start: <span id="x-start"></span>
+      </div>
+      <div>
+        <input type="range" orient="vertical" class="y-input" step="1" min="0" max="499" id="y" /> y start: <span id="y-start"></span>
+      </div>
+    </div>
+    <br>
+    <div class="point-input">
+      <div>
+        <input type="range" step="1" min="0" max="499" id="x2" /> x end: <span id="x-end"></span>
+      </div>
+      <div>
+        <input type="range" orient="vertical" class="y-input" step="1" min="0" max="499" id="y2" /> y end: <span id="y-end"></span>
+      </div>
+    </div>
+    <button id="go">Go!</button>
+  </div>
+  <canvas width=500 height=500 id="canvas"></canvas>
+  <script src="input.js"></script>
+  <script src="classes.js"></script>
+  <script src="client.js"></script>
+</body>
+</html>
