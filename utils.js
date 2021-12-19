@@ -181,8 +181,17 @@ class PathFinder {
   }
 }
 
+const padNibble = bitString => {
+  let result = bitString
+  while (result.length < 4) {
+    result = '0' + result
+  }
+  return result
+}
+
 module.exports = {
   readFile,
   Heap,
-  PathFinder
+  PathFinder,
+  padNibble
 }
