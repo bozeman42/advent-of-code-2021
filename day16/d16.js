@@ -56,7 +56,6 @@ class Packet {
         return subpacketValues[0] === subpacketValues[1] ? 1 : 0
       default: throw Error(`Case ${this.typeId} not handled`)
     }
-
   }
 
   parse() {
