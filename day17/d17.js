@@ -16,8 +16,6 @@ const [xRange, yRange] = input
     .map(x => parseInt(x))
     )
 
-console.log(xRange, yRange)
-
 const totalXMovement = xVelocity => {
   let x = 0
   let v = xVelocity
@@ -27,19 +25,22 @@ const totalXMovement = xVelocity => {
     step++
     x += v
     v--
-    if (x >= xRange[0] && x <= xRange[1]) solutions.push({
-      initX: xVelocity,
-      step,
-      terminal: v === 0
-    })
+    if (x >= xRange[0] && x <= xRange[1]) {
+      solutions.push({
+        initX: xVelocity,
+        step,
+        terminal: v === 0,
+        hit: x
+      })
+    }
   }
   return solutions
 }
 
 const yMovement = yVelocity => {
   let y = 0
-  let v = yVelocity
-  let step = 0
+  let v = yVelocity > 0 ? 0 - yVelocity - 1 : yVelocity
+  let step = yVelocity > 0 ? yVelocity * 2 + 1 : 0
   let peak = 0
   const solutions = []
   while (y >= yRange[0]) {
@@ -51,7 +52,8 @@ const yMovement = yVelocity => {
       solutions.push({
         initY: yVelocity,
         peak,
-        step
+        step,
+        hit: y
       })
     }
   }
@@ -60,12 +62,11 @@ const yMovement = yVelocity => {
 
 let xSolutions = []
 let ySolutions = []
-for(let x = 0; x < 171; x++) {
+for(let x = 0; x <= xRange[1]; x++) {
   let xSteps = totalXMovement(x)
   if (xSteps.length) xSolutions.push(...xSteps)
 }
 
-console.log(xSolutions)
 for(let y = -100; y < 100; y++) {
   let ySteps = yMovement(y)
   if (ySteps.length) ySolutions.push(...ySteps)
@@ -74,6 +75,21 @@ for(let y = -100; y < 100; y++) {
 function buildSolutions(xSolutions, ySolutions) {
   let solutions = []
   ySolutions.forEach(ySolution => {
-    
+    const yStep = ySolution.step
+    xSolutions.filter(xSolution => {
+      return xSolution.step === yStep || (xSolution.terminal === true && xSolution.step <= yStep)
+    }).forEach(xSolution => {
+      const validSolution = [xSolution.initX,ySolution.initY]
+      if(!solutions.some(existingSolution => {
+        return existingSolution[0] === validSolution[0] && existingSolution[1] === validSolution[1]
+      })) {
+        solutions.push(validSolution)
+      }
+    })
   })
+  return solutions
 }
+
+const solutions = buildSolutions(xSolutions, ySolutions)
+
+console.log('Part 2 solution:', solutions.length)
