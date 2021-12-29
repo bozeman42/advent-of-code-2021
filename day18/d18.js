@@ -11,27 +11,24 @@ class Pair {
     this.depth = depth
     const aIsArray = Array.isArray(a)
     const bIsArray = Array.isArray(b)
-    this.a = typeof a === 'number'
-      ? a
-      : new Pair(
-          aIsArray
-            ? a[0]
-            : a.a,
-          aIsArray
-            ? a[1]
-            : a.b,
-          depth + 1)
-    this.b = typeof b === 'number'
-    ? b
-    : new Pair(
-        bIsArray
-          ? b[0]
-          : b.a,
-        bIsArray
-          ? b[1]
-          : b.b,
-        depth + 1)
-    this.testExplode()
+    if (typeof a === 'number') {
+      this.a = a
+    } else if (aIsArray) {
+      this.a = new Pair(a[0], a[1], depth + 1)
+    } else {
+      this.a = new Pair(a.a, a.b, depth + 1)
+    }
+    if (typeof b === 'number') {
+      this.b = b
+    } else if (bIsArray) {
+      this.b = new Pair(b[0], b[1], depth + 1)
+    } else {
+      this.b = new Pair(b.a, b.b, depth + 1)
+    }
+    if (this.depth === 0) {
+      this.testAExplode()
+      this.testBExplode()
+    }
   }
   
   add(pair) {
@@ -45,7 +42,7 @@ class Pair {
     if (typeof this.b !== 'number') this.b.setDepth(n + 1)
   }
 
-  testExplode() {
+  explode() {
     if (this.depth === 4) {
       console.log('explode', this.a, this.b)
       return {
@@ -58,6 +55,12 @@ class Pair {
     }
     const aData = this.testAExplode()
     const bData = this.testBExplode()
+    const explosionBelow = aData.explodes || bData.explodes
+    return {
+      ...aData,
+      ...bData,
+      explodes: explosionBelow
+    }
   }
 
   addA(n)  {
@@ -78,7 +81,7 @@ class Pair {
 
   testAExplode() {
     if (typeof this.a === 'number') return  { explodes: false }
-    const explosion = this.a.testExplode()
+    const explosion = this.a.explode()
     if (!explosion.explodes) return  { explodes: false }
     if (typeof this.b === 'number' && !explosion.bSpread) {
       this.b = this.b + explosion.b
@@ -96,7 +99,7 @@ class Pair {
 
   testBExplode() {
     if (typeof this.b === 'number') return  { explodes: false }
-    const explosion = this.b.testExplode()
+    const explosion = this.b.explode()
     if (!explosion.explodes) return  { explodes: false }
     if (typeof this.a === 'number' && !explosion.aSpread) {
       this.a = this.a + explosion.a
@@ -123,7 +126,12 @@ const input = readFile(resolve(__dirname, `${FILENAME}.txt`))
   .split('\n')
   .map(line => JSON.parse(line))
   .map(item => new Pair(item[0], item[1], 0))
-  .reduce((result, pair) => {
-    return result.add(pair)
-  })
-console.log(input.magnitude)
+  // .reduce((result, pair) => {
+  //   return result.add(pair)
+  // })
+
+Pair.prototype.toString = function () {
+  return `[${this.a},${this.b}]`
+}
+
+console.log(input.toString())
