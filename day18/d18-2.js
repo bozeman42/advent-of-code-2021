@@ -1,26 +1,34 @@
 const { resolve } = require('path')
 const { readFile } = require('../utils')
 
-const USE_EXAMPLE = true
+const USE_EXAMPLE = false
 
 const FILENAME = USE_EXAMPLE ? 'example' : 'input'
 
+const SIDES = {
+  LEFT: 'left',
+  RIGHT: 'right'
+}
+
 const EXPLODE_DEPTH = 4
+const SPLIT_LIMIT = 10
 
 class Tree {
   constructor(array) {
     this.tree = new TreeNode(array)
-    this.getArray()
     this.test()
+  }
+
+  get magnitude() {
+    return this.tree.magnitude
   }
 
   add(tree) {
-    this.tree = new TreeNode([this.tree, tree.tree])
-    this.test()
-    return this
+    return new Tree([this.tree.getArray(), tree.tree.getArray()])
   }
 
   test() {
+    // console.log('TEST INITIATION', JSON.stringify(this.getArray()))
     let actionOccured = false
     actionOccured = this.testForExplosion()
     if (actionOccured) return this.test()
@@ -29,7 +37,45 @@ class Tree {
   }
   
   testForSplit() {
-    // implement test for split
+    let stack = []
+    let current = {
+      side: null,
+      tree: this.tree
+    }
+    let currentSide = SIDES.LEFT
+    stack.push(current)
+    do {
+      while(!current.tree.leaf) {
+        currentSide = SIDES.LEFT
+        current = {
+          tree: current.tree.left,
+          side: currentSide
+        }
+        if (!current.tree.leaf) {
+          stack.push(current)
+          continue
+        }
+      }
+      // console.log('testing value:', current.tree.value)
+      if (current.tree.value >= SPLIT_LIMIT) {
+        current.tree.split()
+        return true
+      } else {
+        current = stack.pop()
+        current = {
+          tree: current.tree.right,
+          side: SIDES.RIGHT
+        }
+        currentSide = SIDES.RIGHT
+        if (!current.tree.leaf) stack.push(current)
+      }
+    } while (stack.length)
+    // console.log('testing value:', current.tree.value)
+    if (current.tree.value >= SPLIT_LIMIT) {
+      current.tree.split()
+      return true
+    }
+    return false
   }
 
   testForExplosion() {
@@ -54,6 +100,7 @@ class Tree {
       }
       if (current.path.length > EXPLODE_DEPTH) {
         current = stack.pop()
+        // console.log('Boom!', current.path, JSON.stringify(current.tree.getArray()))
         const { tree: {left: { value: left }, right: {value: right}}, path } = current
         const parentPosition = path[path.length - 1]
         this.prune(path)
@@ -74,7 +121,7 @@ class Tree {
             current.tree.right.addLeft(right)
           }
         }
-        console.log(JSON.stringify(this.getArray()))
+        // console.log(JSON.stringify(this.getArray()))
         return true
       } else {
         current = stack.pop()
@@ -114,7 +161,7 @@ class Tree {
   }
 
   getArray() {
-    return this.tree.getArray()
+    return JSON.stringify(this.tree.getArray())
   }
 }
 
@@ -125,6 +172,11 @@ class TreeNode {
       this.left = value[0].constructor.name === 'TreeNode' ? value[0] : new TreeNode(value[0])
       this.right = value[1].constructor.name === 'TreeNode' ? value[1] : new TreeNode(value[1])
       this.value = null
+    } else if (value.constructor.name === 'TreeNode') {
+      this.left = value.left
+      this.right = value.right
+      this.leaf = value.leaf
+      this.value = value.value
     } else {
       this.left = null
       this.right = null
@@ -140,9 +192,23 @@ class TreeNode {
     this.left.addLeft(n)
   }
 
+  split() {
+    const [left, right] = [Math.floor(this.value / 2), Math.ceil(this.value / 2)]
+    // console.log('SPLIT', this.value, `[${left},${right}]`)
+    this.leaf = false
+    this.left = new TreeNode(left)
+    this.right = new TreeNode(right)
+    this.value = null
+  }
+
   addRight(n) {
     if (this.leaf) return this.value += n
     this.right.addRight(n)
+  }
+
+  get magnitude() {
+    if (this.leaf) return this.value
+    return 3 * this.left.magnitude + 2 * this.right.magnitude
   }
 
   getArray() {
@@ -151,12 +217,28 @@ class TreeNode {
   }
 }
 
+
+
 const input = readFile(resolve(__dirname, `${FILENAME}.txt`))
   .split('\n')
-  .map(line => new Tree(JSON.parse(line)))
+  .map(x => new Tree(JSON.parse(x)))
 
-let result = input.reduce((result, pair) => {
-  return result.add(pair)
+const result = input.reduce((total, pair) => {
+  return total.add(pair)
 })
 
-console.log(JSON.stringify(result.getArray()))
+console.log(result.magnitude)
+
+const part2Result = input.reduce((max, line, index, arr) => {
+  let newMax = max
+  arr.forEach((otherLine, otherIndex) => {
+    if (otherIndex !==index){
+      let sum = line.add(otherLine)
+      let value = sum.magnitude
+      newMax = Math.max(value, newMax)
+    }
+  })
+  return newMax
+}, 0)
+
+console.log('part 2:', part2Result)
